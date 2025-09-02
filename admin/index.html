@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Efed CMS - Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Loading screen -->
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading...</p>
+        </div>
+
+        <!-- Login form -->
+        <div id="login-form" class="auth-container" style="display: none;">
+            <div class="auth-box">
+                <h1>Efed CMS</h1>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Login</button>
+                </form>
+                
+                <div id="seed-owner-section" style="display: none;">
+                    <hr>
+                    <h3>Setup Initial Owner</h3>
+                    <form id="seedOwnerForm">
+                        <div class="form-group">
+                            <label for="owner-email">Owner Email</label>
+                            <input type="email" id="owner-email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="owner-password">Owner Password</label>
+                            <input type="password" id="owner-password" name="password" required minlength="8">
+                        </div>
+                        <button type="submit" class="btn btn-secondary">Create Owner</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2FA verification form -->
+        <div id="twofa-form" class="auth-container" style="display: none;">
+            <div class="auth-box">
+                <h1>Two-Factor Authentication</h1>
+                <p>Enter the 6-digit code from your authenticator app:</p>
+                <form id="twofaForm">
+                    <div class="form-group">
+                        <label for="twofa-token">Authentication Code</label>
+                        <input type="text" id="twofa-token" name="token" pattern="[0-9]{6}" maxlength="6" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Verify</button>
+                    <button type="button" class="btn btn-secondary" onclick="logout()">Cancel</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Main admin interface -->
+        <div id="admin-interface" style="display: none;">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-content">
+                    <h1>Efed CMS</h1>
+                    <nav class="nav">
+                        <button class="nav-btn" data-section="dashboard">Dashboard</button>
+                        <button class="nav-btn" data-section="wrestlers">Wrestlers</button>
+                        <button class="nav-btn" data-section="companies">Companies</button>
+                        <button class="nav-btn" data-section="divisions">Divisions</button>
+                        <button class="nav-btn" data-section="events">Events</button>
+                        <button class="nav-btn" data-section="matches">Matches</button>
+                        <button class="nav-btn" data-section="tags">Tags</button>
+                    </nav>
+                    <div class="user-menu">
+                        <span id="user-info"></span>
+                        <button class="btn btn-secondary" onclick="logout()">Logout</button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main content area -->
+            <main class="main">
+                <!-- Dashboard -->
+                <section id="dashboard-section" class="section">
+                    <h2>Dashboard</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <h3>Wrestlers</h3>
+                            <div class="stat-number" id="stat-wrestlers">-</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Companies</h3>
+                            <div class="stat-number" id="stat-companies">-</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Events</h3>
+                            <div class="stat-number" id="stat-events">-</div>
+                        </div>
+                        <div class="stat-card">
+                            <h3>Matches</h3>
+                            <div class="stat-number" id="stat-matches">-</div>
+                        </div>
+                    </div>
+                    
+                    <div class="actions">
+                        <button class="btn btn-primary" onclick="rebuildManifests()">Rebuild Manifests</button>
+                        <button class="btn btn-secondary" onclick="showTwoFASetup()">Setup 2FA</button>
+                    </div>
+                </section>
+
+                <!-- Entity sections (wrestlers, companies, etc.) -->
+                <section id="wrestlers-section" class="section" style="display: none;">
+                    <div class="section-header">
+                        <h2>Wrestlers</h2>
+                        <button class="btn btn-primary" onclick="showEntityForm('wrestlers')">Add Wrestler</button>
+                    </div>
+                    <div class="filters">
+                        <input type="text" id="wrestlers-search" placeholder="Search wrestlers..." onkeyup="searchEntities('wrestlers')">
+                        <select id="wrestlers-sort" onchange="sortEntities('wrestlers')">
+                            <option value="created_at-DESC">Newest First</option>
+                            <option value="name-ASC">Name A-Z</option>
+                            <option value="name-DESC">Name Z-A</option>
+                            <option value="elo-DESC">Highest ELO</option>
+                            <option value="points-DESC">Most Points</option>
+                        </select>
+                    </div>
+                    <div id="wrestlers-list" class="entity-list"></div>
+                    <div id="wrestlers-pagination" class="pagination"></div>
+                </section>
+
+                <section id="companies-section" class="section" style="display: none;">
+                    <div class="section-header">
+                        <h2>Companies</h2>
+                        <button class="btn btn-primary" onclick="showEntityForm('companies')">Add Company</button>
+                    </div>
+                    <div class="filters">
+                        <input type="text" id="companies-search" placeholder="Search companies..." onkeyup="searchEntities('companies')">
+                        <select id="companies-sort" onchange="sortEntities('companies')">
+                            <option value="created_at-DESC">Newest First</option>
+                            <option value="name-ASC">Name A-Z</option>
+                            <option value="name-DESC">Name Z-A</option>
+                        </select>
+                    </div>
+                    <div id="companies-list" class="entity-list"></div>
+                    <div id="companies-pagination" class="pagination"></div>
+                </section>
+
+                <section id="divisions-section" class="section" style="display: none;">
+                    <div class="section-header">
+                        <h2>Divisions</h2>
+                        <button class="btn btn-primary" onclick="showEntityForm('divisions')">Add Division</button>
+                    </div>
+                    <div class="filters">
+                        <input type="text" id="divisions-search" placeholder="Search divisions..." onkeyup="searchEntities('divisions')">
+                        <select id="divisions-sort" onchange="sortEntities('divisions')">
+                            <option value="created_at-DESC">Newest First</option>
+                            <option value="name-ASC">Name A-Z</option>
+                            <option value="name-DESC">Name Z-A</option>
+                        </select>
+                    </div>
+                    <div id="divisions-list" class="entity-list"></div>
+                    <div id="divisions-pagination" class="pagination"></div>
+                </section>
+
+                <section id="events-section" class="section" style="display: none;">
+                    <div class="section-header">
+                        <h2>Events</h2>
+                        <button class="btn btn-primary" onclick="showEntityForm('events')">Add Event</button>
+                    </div>
+                    <div class="filters">
+                        <input type="text" id="events-search" placeholder="Search events..." onkeyup="searchEntities('events')">
+                        <select id="events-sort" onchange="sortEntities('events')">
+                            <option value="date-DESC">Newest First</option>
+                            <option value="date-ASC">Oldest First</option>
+                            <option value="name-ASC">Name A-Z</option>
+                        </select>
+                    </div>
+                    <div id="events-list" class="entity-list"></div>
+                    <div id="events-pagination" class="pagination"></div>
+                </section>
+
+                <section id="matches-section" class="section" style="display: none;">
+                    <div class="section-header">
+                        <h2>Matches</h2>
+                        <button class="btn btn-primary" onclick="showEntityForm('matches')">Add Match</button>
+                    </div>
+                    <div class="filters">
+                        <input type="text" id="matches-search" placeholder="Search matches..." onkeyup="searchEntities('matches')">
+                        <select id="matches-sort" onchange="sortEntities('matches')">
+                            <option value="created_at-DESC">Newest First</option>
+                            <option value="name-ASC">Name A-Z</option>
+                        </select>
+                    </div>
+                    <div id="matches-list" class="entity-list"></div>
+                    <div id="matches-pagination" class="pagination"></div>
+                </section>
+
+                <section id="tags-section" class="section" style="display: none;">
+                    <div class="section-header">
+                        <h2>Tags</h2>
+                        <button class="btn btn-primary" onclick="showEntityForm('tags')">Add Tag</button>
+                    </div>
+                    <div class="filters">
+                        <input type="text" id="tags-search" placeholder="Search tags..." onkeyup="searchEntities('tags')">
+                    </div>
+                    <div id="tags-list" class="entity-list"></div>
+                    <div id="tags-pagination" class="pagination"></div>
+                </section>
+            </main>
+        </div>
+
+        <!-- Modal for forms -->
+        <div id="modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-title">Form</h3>
+                    <button class="modal-close" onclick="closeModal()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <form id="entity-form">
+                        <div id="form-fields"></div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary">Save</button>
+                            <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- 2FA Setup Modal -->
+        <div id="twofa-setup-modal" class="modal" style="display: none;">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Setup Two-Factor Authentication</h3>
+                    <button class="modal-close" onclick="closeTwoFASetup()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div id="twofa-setup-content"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notification area -->
+        <div id="notifications" class="notifications"></div>
+    </div>
+
+    <script src="admin.js"></script>
+</body>
+</html>
