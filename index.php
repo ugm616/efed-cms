@@ -159,6 +159,20 @@ function handleAuthEndpoint(array $segments, string $method, Auth $auth, DB $db)
             }
             break;
             
+        case 'user':
+            if ($method === 'GET') {
+                $user = $auth->getCurrentUser();
+                if ($user) {
+                    echo Security::safeJsonEncode($user);
+                } else {
+                    http_response_code(401);
+                    echo Security::safeJsonEncode(['error' => true, 'message' => 'Not authenticated']);
+                }
+            } else {
+                throw new Exception('Method not allowed', 405);
+            }
+            break;
+            
         case '2fa':
             handle2FAEndpoint($segments, $method, $auth);
             break;

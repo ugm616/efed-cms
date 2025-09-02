@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Efed CMS - Public API</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f8f9fa;
+            color: #333;
+        }
+        
+        h1, h2, h3 {
+            color: #007bff;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .endpoint {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1rem 0;
+            font-family: monospace;
+        }
+        
+        .method {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.875rem;
+            margin-right: 0.5rem;
+        }
+        
+        .get { background-color: #d4edda; color: #155724; }
+        .post { background-color: #d1ecf1; color: #0c5460; }
+        .put { background-color: #fff3cd; color: #856404; }
+        .delete { background-color: #f8d7da; color: #721c24; }
+        
+        code {
+            background-color: #f8f9fa;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        pre {
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 1rem;
+            overflow-x: auto;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border-radius: 8px;
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .manifest-links {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .manifest-link {
+            display: block;
+            padding: 1rem;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #007bff;
+            font-weight: bold;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+        
+        .manifest-link:hover {
+            background-color: #007bff;
+            color: white;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🏟️ Efed CMS Public API</h1>
+        <p>Welcome to the Efed CMS public API. This system provides a JSON-first content management system for wrestling federations, managing wrestlers, companies, divisions, events, matches, and tags.</p>
+    </div>
+
+    <div class="card">
+        <h2>📊 Live Statistics</h2>
+        <div class="stats" id="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="stat-wrestlers">-</div>
+                <div class="stat-label">Wrestlers</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-companies">-</div>
+                <div class="stat-label">Companies</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-events">-</div>
+                <div class="stat-label">Events</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-matches">-</div>
+                <div class="stat-label">Matches</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>📋 Public Data Manifests</h2>
+        <p>Access complete datasets in JSON format:</p>
+        <div class="manifest-links">
+            <a href="/manifest/wrestlers.json" class="manifest-link">
+                👤 Wrestlers Manifest
+            </a>
+            <a href="/manifest/companies.json" class="manifest-link">
+                🏢 Companies Manifest
+            </a>
+            <a href="/manifest/divisions.json" class="manifest-link">
+                🏆 Divisions Manifest
+            </a>
+            <a href="/manifest/events.json" class="manifest-link">
+                📅 Events Manifest
+            </a>
+            <a href="/manifest/matches.json" class="manifest-link">
+                🥊 Matches Manifest
+            </a>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>🔗 API Endpoints</h2>
+        
+        <h3>Authentication</h3>
+        <div class="endpoint">
+            <span class="method post">POST</span> /api/auth/login
+            <p>Authenticate user with email and password</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method post">POST</span> /api/auth/logout
+            <p>Log out current user</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method get">GET</span> /api/csrf
+            <p>Get CSRF token for form submissions</p>
+        </div>
+
+        <h3>Wrestlers</h3>
+        <div class="endpoint">
+            <span class="method get">GET</span> /api/wrestlers
+            <p>List all wrestlers with pagination and search</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method get">GET</span> /api/wrestlers/{id}
+            <p>Get specific wrestler by ID</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method post">POST</span> /api/wrestlers
+            <p>Create new wrestler (requires authentication)</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method put">PUT</span> /api/wrestlers/{id}
+            <p>Update wrestler (requires authentication)</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method delete">DELETE</span> /api/wrestlers/{id}
+            <p>Delete wrestler (requires admin role)</p>
+        </div>
+
+        <h3>Companies</h3>
+        <div class="endpoint">
+            <span class="method get">GET</span> /api/companies
+            <p>List all companies with pagination and search</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method get">GET</span> /api/companies/{id}
+            <p>Get specific company by ID</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method post">POST</span> /api/companies
+            <p>Create new company (requires authentication)</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method put">PUT</span> /api/companies/{id}
+            <p>Update company (requires authentication)</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method delete">DELETE</span> /api/companies/{id}
+            <p>Delete company (requires admin role)</p>
+        </div>
+
+        <h3>Divisions</h3>
+        <div class="endpoint">
+            <span class="method get">GET</span> /api/divisions
+            <p>List all divisions with pagination and search</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method get">GET</span> /api/divisions/{id}
+            <p>Get specific division by ID</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method post">POST</span> /api/divisions
+            <p>Create new division (requires authentication)</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method put">PUT</span> /api/divisions/{id}
+            <p>Update division (requires authentication)</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method delete">DELETE</span> /api/divisions/{id}
+            <p>Delete division (requires admin role)</p>
+        </div>
+
+        <h3>Events</h3>
+        <div class="endpoint">
+            <span class="method get">GET</span> /api/events
+            <p>List all events with pagination and search</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method get">GET</span> /api/events/{id}
+            <p>Get specific event by ID</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method post">POST</span> /api/events
+            <p>Create new event (requires authentication)</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method put">PUT</span> /api/events/{id}
+            <p>Update event (requires authentication)</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method delete">DELETE</span> /api/events/{id}
+            <p>Delete event (requires admin role)</p>
+        </div>
+
+        <h3>Matches</h3>
+        <div class="endpoint">
+            <span class="method get">GET</span> /api/matches
+            <p>List all matches with pagination and search</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method get">GET</span> /api/matches/{id}
+            <p>Get specific match by ID</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method post">POST</span> /api/matches
+            <p>Create new match (requires authentication)</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method put">PUT</span> /api/matches/{id}
+            <p>Update match (requires authentication)</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method delete">DELETE</span> /api/matches/{id}
+            <p>Delete match (requires admin role)</p>
+        </div>
+
+        <h3>Tags</h3>
+        <div class="endpoint">
+            <span class="method get">GET</span> /api/tags
+            <p>List all tags with pagination and search</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method post">POST</span> /api/tags
+            <p>Create new tag (requires authentication)</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method post">POST</span> /api/tags/attach
+            <p>Attach tag to entity (requires authentication)</p>
+        </div>
+        
+        <div class="endpoint">
+            <span class="method post">POST</span> /api/tags/detach
+            <p>Detach tag from entity (requires authentication)</p>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>📖 Example Usage</h2>
+        
+        <h3>Get All Wrestlers</h3>
+        <pre><code>GET /api/wrestlers?page=1&limit=20&search=john&order_by=name&order_direction=ASC</code></pre>
+        
+        <h3>Create a Wrestler (requires authentication)</h3>
+        <pre><code>POST /api/wrestlers
+Content-Type: application/json
+
+{
+    "name": "John Cena",
+    "slug": "john-cena",
+    "active": true,
+    "record_wins": 150,
+    "record_losses": 45,
+    "record_draws": 2,
+    "elo": 1850,
+    "points": 2500,
+    "profile_img_url": "https://example.com/cena.jpg",
+    "csrf_token": "your-csrf-token"
+}</code></pre>
+        
+        <h3>Get Wrestler Manifest</h3>
+        <pre><code>GET /manifest/wrestlers.json
+
+Response:
+{
+    "entity": "wrestlers",
+    "count": 150,
+    "generated_at": "2024-01-01T12:00:00Z",
+    "data": [
+        {
+            "id": 1,
+            "slug": "john-cena",
+            "name": "John Cena",
+            "active": true,
+            "record_wins": 150,
+            "record_losses": 45,
+            "record_draws": 2,
+            "elo": 1850,
+            "points": 2500,
+            "profile_img_url": "https://example.com/cena.jpg",
+            "created_at": "2023-01-01 12:00:00"
+        }
+    ]
+}</code></pre>
+    </div>
+
+    <div class="card">
+        <h2>🔐 Authentication</h2>
+        <p>Most endpoints require authentication. The system uses:</p>
+        <ul>
+            <li><strong>Session-based authentication</strong> with secure HTTP-only cookies</li>
+            <li><strong>CSRF protection</strong> for all state-changing operations</li>
+            <li><strong>Role-based access control</strong> with 5 user levels:
+                <ul>
+                    <li>Viewer (read-only access)</li>
+                    <li>Contributor (can create content)</li>
+                    <li>Editor (can edit content)</li>
+                    <li>Admin (can delete content and manage users)</li>
+                    <li>Owner (full system access)</li>
+                </ul>
+            </li>
+            <li><strong>Optional Two-Factor Authentication</strong> with TOTP</li>
+        </ul>
+        <p><a href="/admin">Access the admin interface →</a></p>
+    </div>
+
+    <div class="card">
+        <h2>📝 Data Schema</h2>
+        <p>The system manages the following entities:</p>
+        <ul>
+            <li><strong>Wrestlers</strong>: Individual performers with records, ratings, and statistics</li>
+            <li><strong>Companies</strong>: Wrestling organizations and promotions</li>
+            <li><strong>Divisions</strong>: Weight classes, gender divisions, and competition categories</li>
+            <li><strong>Events</strong>: Shows, pay-per-views, and wrestling events</li>
+            <li><strong>Matches</strong>: Individual contests between wrestlers</li>
+            <li><strong>Tags</strong>: Flexible categorization system for all entities</li>
+        </ul>
+    </div>
+
+    <script>
+        // Load statistics
+        async function loadStats() {
+            const entities = ['wrestlers', 'companies', 'events', 'matches'];
+            
+            for (const entity of entities) {
+                try {
+                    const response = await fetch(`/api/${entity}?limit=1`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        document.getElementById(`stat-${entity}`).textContent = 
+                            data.pagination.total.toLocaleString();
+                    }
+                } catch (error) {
+                    document.getElementById(`stat-${entity}`).textContent = 'Error';
+                }
+            }
+        }
+        
+        // Load stats on page load
+        loadStats();
+        
+        // Refresh stats every 30 seconds
+        setInterval(loadStats, 30000);
+    </script>
+</body>
+</html>
